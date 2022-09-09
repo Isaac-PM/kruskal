@@ -1,6 +1,6 @@
 # Assigned research of the kruskal algorithm @ kruskal
 
-## Estudiantes / Students
+## Estudiante / Student
 
 Isaac Fabián Palma Medina @ isaac.palma.medina@est.una.ac.cr
 

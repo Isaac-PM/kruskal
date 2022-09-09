@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+Isaac F. Palma Medina
+ID: 1-1865-0422
+Docente: Carlos Loría Saénz
+NRC: 41713 1pm
+"""
+
+import matplotlib.pyplot as plt
+import networkx as nx
+
+def draw_weighted_graph(G, graph_name:str="Test", graph_path:str="None"):
+    fig = plt.figure(graph_name, figsize = (8, 8))
+    plt.title(f"{graph_name =} : {graph_path =}", fontdict = {"fontsize" : 12})
+    pos = nx.spring_layout(G, seed = 7)
+    nx.draw_networkx_nodes(G, pos, node_size = 700, node_color = "cyan")
+    nx.draw_networkx_edges(G, pos, edgelist = G.edges(), width = 3)
+    """
+    # Función para mostrar un grafo con pesos. 
+    Enlaces:
+    https://networkx.org/documentation/stable/auto_examples/drawing/plot_weighted_graph.html
+    https://stackoverflow.com/questions/47094949/labeling-edges-in-networkx
+    """
+    nx.draw_networkx_labels(G, pos, font_size = 18)
+    edge_labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels)
+    ax = plt.gca()
+    ax.margins(0.08)
+    plt.axis("off")
+    plt.tight_layout()
+    plt.show()
+
+def my_kruskal(G):
+    """
+    Los nodos son ordenados según su peso.
+    sorted: ordena los elementos de una lista según un parámetro.
+    G.edges(data = True): llama al conjunto de nodos acompañados de su peso (debido a "data = True").
+    La "key" es igualada a una función lambda, dicha función llamará de cada nodo su peso,
+    el resultado de esta operación ayudará a "sorted" a ordenar el diccionario. 
+    Se hace uso de z[2] para acceder al segundo elemento (data) de cada nodo.
+    Enlaces:
+    https://borjauria.es/que-son-y-como-utilizar-lambdas-en-python-4d1d168e2f90
+    https://towardsdatascience.com/sorting-a-dictionary-in-python-4280451e1637
+    https://stackoverflow.com/questions/52551033/bubble-sorting-in-dictionary-in-python
+    """
+    sorted_edges = sorted(G.edges(data = True), key = lambda z: z[2].get('weight', 1))
+    
+    aux = nx.Graph() # Se crea un grafo auxiliar para alojar la respuesta.
+    aux.add_nodes_from(G.nodes())
+    for i in range(len(sorted_edges)):
+        if nx.is_simple_path(aux, [sorted_edges[i][0], sorted_edges[i][1]]) == False: 
+            try: # Se verifica si existe un camino previo entre dos nodos.
+                nx.shortest_path(aux, sorted_edges[i][0], sorted_edges[i][1]) 
+                # Si existiese no se añade ya que crearía un ciclo.
+            except nx.NetworkXNoPath:
+                aux.add_edge(sorted_edges[i][0], sorted_edges[i][1], weight=(sorted_edges[i][2]).get('weight', 1)) 
+                # Si no existe, se añade, y se van haciendo las uniones entre las distintas componentes.
+                """
+                Enlaces:
+                https://www.baeldung.com/cs/check-if-two-nodes-are-connected
+                https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.shortest_paths.generic.shortest_path.html
+                """
+    return aux # Se devuelve el nuevo grafo.
+
+g1_path = "../data/graph1.graphml"
+graph1 = nx.read_graphml(g1_path)
+draw_weighted_graph(graph1, "Exercise 6, Practice IV", g1_path)
+draw_weighted_graph(my_kruskal(graph1), "Exercise 6, Practice IV, Kruskal", g1_path)
+
+g2_path = "../data/graph2.graphml"
+graph2 = nx.read_graphml(g2_path)
+draw_weighted_graph(graph2, "Example 1", g2_path)
+draw_weighted_graph(my_kruskal(graph2), "Example 1, Kruskal", g2_path)
